@@ -17,7 +17,8 @@ export const addProduct = async (req, res) => {
       }
   
       // Ensure images are correctly saved
-      const images = req.files.map(file => file.path);
+      const images = req.files.map(file => "/" + file.path.replace(/\\/g, "/"));
+
   
       const newProduct = new Product({
         name, description, price, discountPrice, stock, unit, deliveryTime,
@@ -29,8 +30,52 @@ export const addProduct = async (req, res) => {
       res.status(201).json({ message: "Product added successfully!", product: newProduct });
   
     } catch (error) {
-      console.error("Error in addProduct:", error);
+     
       res.status(500).json({ message: "Server error", error });
     }
   };
   
+  // productController.js
+  export const getProducts = async (req, res) => {
+    try {
+      let { category, subcategory } = req.query;
+      
+  
+      const query = {};
+      if (category) query.category = new RegExp(`^${category}$`, "i");  
+  
+      if (subcategory) {
+        // Convert hyphens to spaces for better matching
+        const normalizedSubcategory = subcategory.replace(/-/g, " ");
+        query.subcategory = new RegExp(`^${normalizedSubcategory}$`, "i");
+      }
+  
+      
+  
+      const products = await Product.find(query);
+      
+  
+      res.json({ products });
+    } catch (error) {
+     
+      res.status(500).json({ message: "Error fetching products" });
+    }
+  };
+  
+  
+  export const getProductById = async (req, res) => {
+    try {
+      const { productId } = req.params;
+      const product = await Product.findById(productId);
+      if (!product) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+      res.json({ product });
+    } catch (error) {
+      
+      res.status(500).json({ message: "Error fetching product" });
+    }
+  };
+  
+
+

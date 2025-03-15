@@ -1,7 +1,7 @@
 import multer from "multer";
 import path from "path";
 
-// Ensure the "uploads" folder exists
+
 import fs from "fs";
 const uploadDir = path.join("D:/SweetHome/backend-sweethome/uploads");
 if (!fs.existsSync(uploadDir)) {
