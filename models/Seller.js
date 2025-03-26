@@ -1,9 +1,10 @@
 // models/Seller.js
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
-
+import { v4 as uuidv4 } from 'uuid'; // Use import instead of require
 const sellerSchema = new mongoose.Schema(
   {
+    sellerId: { type: String, unique: true, default: uuidv4 }, // Auto-generate sellerId
     name: { type: String, required: true },
     mobile: { type: String, required: true },
     email: { type: String, required: true, unique: true },

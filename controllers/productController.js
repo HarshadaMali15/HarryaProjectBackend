@@ -79,3 +79,21 @@ export const addProduct = async (req, res) => {
   
 
 
+export const getProductsBySeller = async (req, res) => {
+    try {
+        const { sellerId } = req.params;
+        if (!sellerId) {
+            return res.status(400).json({ message: "Seller ID is required" });
+        }
+
+        const products = await Product.find({ sellerId: sellerId });
+
+        if (!products.length) {
+            return res.status(404).json({ message: "No products found for this seller" });
+        }
+
+        res.json({ products });
+    } catch (error) {
+        res.status(500).json({ message: "Error fetching seller products", error });
+    }
+};

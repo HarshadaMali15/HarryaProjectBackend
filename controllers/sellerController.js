@@ -3,21 +3,35 @@ import Seller from "../models/Seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 
-// Register Seller
-export const registerSeller = async (req, res) => {
-  try {
-    const { name, mobile, email, password } = req.body;
 
-    let seller = await Seller.findOne({ email });
-    if (seller) return res.status(400).json({ message: "Seller already exists" });
 
-    seller = new Seller({ name, mobile, email, password });
-    await seller.save();
+export const registerSeller = async (req, res) =>  {
+    try {
+        const { name, mobile, email, password } = req.body;
 
-    res.status(201).json({ message: "Seller registered successfully" });
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
-  }
+        // Check if seller already exists
+        let existingSeller = await Seller.findOne({ email });
+        if (existingSeller) {
+            return res.status(400).json({ message: 'Seller already exists' });
+        }
+
+       
+
+        // Create new seller with sellerId
+        const newSeller = new Seller({
+            sellerId: undefined, // Auto-generated from schema
+            name,
+            mobile,
+            email,
+            password
+        });
+
+        // Save to database
+        await newSeller.save();
+        res.status(201).json({ message: 'Seller registered successfully', seller: newSeller });
+    } catch (error) {
+        res.status(500).json({ message: 'Error registering seller', error });
+    }
 };
 
 // Seller Login
@@ -91,4 +105,15 @@ export const logoutSeller = (req, res) => {
   });
 
   res.json({ message: "Logout successful" });
+};
+
+export const getSellerProfile = async (req, res) => {
+  try {
+    const seller = await Seller.findById(req.seller.id).select("-password");
+    if (!seller) return res.status(404).json({ message: "Seller not found" });
+
+    res.status(200).json(seller);
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
+  }
 };
